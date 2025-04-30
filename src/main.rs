@@ -19,16 +19,18 @@ async fn main() -> io::Result<()> {
     let listener = TcpListener::bind(cli.listen).await?;
 
     loop {
-        let (socket, remote) = listener.accept().await?;
+        let (mut socket, remote) = listener.accept().await?;
         println!("{remote} connected!");
 
         tokio::spawn(async move {
+            let (rx, _tx) = socket.split();
+
             loop {
-                socket.readable().await.expect("sockerr");
+                rx.readable().await.expect("sockerr");
 
                 let mut buf = [0; 4096];
 
-                match socket.try_read(&mut buf) {
+                match rx.try_read(&mut buf) {
                     Ok(0) => break,
                     Ok(_) => {}
                     Err(ref e) if e.kind() == io::ErrorKind::WouldBlock => {
