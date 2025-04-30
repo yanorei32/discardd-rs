@@ -10,6 +10,12 @@ env:
 
 jobs:
   release:
+    permissions:
+      packages: write
+      checks: write
+      contents: write
+      deployments: write
+
     name: release
     runs-on: ubuntu-24.04
     steps:
