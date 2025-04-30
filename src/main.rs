@@ -12,21 +12,26 @@ struct Cli {
 
 #[tokio::main]
 async fn main() -> io::Result<()> {
+    tracing_subscriber::fmt::init();
+
     let cli = Cli::parse();
 
-    println!("Listen on: {}", cli.listen);
+    tracing::info!("Server is ready on {}", cli.listen);
 
     let listener = TcpListener::bind(cli.listen).await?;
 
     loop {
         let (mut socket, remote) = listener.accept().await?;
-        println!("{remote} connected!");
+        tracing::info!("{remote} connected!");
 
         tokio::spawn(async move {
             let (rx, _tx) = socket.split();
 
             loop {
-                rx.readable().await.expect("sockerr");
+                if let Err(e) = rx.readable().await {
+                    tracing::error!("Read Error [0] {e}");
+                    break;
+                }
 
                 let mut buf = [0; 4096];
 
@@ -36,11 +41,14 @@ async fn main() -> io::Result<()> {
                     Err(ref e) if e.kind() == io::ErrorKind::WouldBlock => {
                         continue;
                     }
-                    Err(e) => Err(e).expect("readerr"),
+                    Err(e) => {
+                        tracing::error!("Read Error [1] {e}");
+                        break;
+                    }
                 }
             }
 
-            println!("{remote} disconnected!");
+            tracing::info!("{remote} disconnected!");
         });
     }
 }
