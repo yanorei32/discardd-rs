@@ -21,7 +21,7 @@ COPY src/ /usr/src/discardd-rs/src/
 
 RUN touch src/* && cargo build --release
 
-FROM debian:bookworm-slim@sha256:e9ac68ffde903b241342267a51cd74c5417414af652cb2e380c6ddcf522589bc
+FROM debian:bookworm-slim@sha256:5accafaaf0f2c0a3ee5f2dcd9a5f2ef7ed3089fe4ac6a9fc9b1cf16396571322
 
 WORKDIR /
 
